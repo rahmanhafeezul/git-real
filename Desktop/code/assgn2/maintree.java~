@@ -1,0 +1,175 @@
+class NoSuchEmployeeFoundException extends Exception 
+{
+    	NoSuchEmployeeFoundException(String input) 
+	{
+		System.out.println("No employee exists by the name " + input);
+	}
+}
+
+class qnode
+{
+	companynode data;
+	qnode next,prev;
+	qnode()
+	{
+		companynode data=new companynode();
+		next=null;
+		prev=null;
+	}
+}
+
+class queue
+{
+	qnode header,trailer;
+	queue()
+	{
+		header=new qnode();
+		trailer=new qnode();
+		header.next=trailer;
+		trailer.prev=header;
+		header.prev=null;
+		trailer.next=null;
+	}
+	void enqueue(companynode p)
+	{
+		qnode n = new qnode();
+		n.data=p;
+		n.prev=trailer.prev;
+		n.next=trailer;
+		n.prev.next=n;
+		n.next.prev=n;
+	}
+	companynode dequeue()
+	{
+		qnode n = header.next;
+		header.next=header.next.next;
+		header.next.prev=header;
+		return n.data;
+	}
+	boolean isempty()
+	{
+		if(header.next==trailer)
+			return true;
+		return false;
+	}
+}
+
+class companynode 
+{
+	companynode boss, next, prev;
+	String name;
+	int level;
+	list children;
+
+	companynode insertunder(String input) 
+	{
+	        if (children == null) 
+		{
+			children = new list();
+	        }
+	        companynode p;
+		p = new companynode();
+		p.name = new String();
+		p.name = input;
+		p.boss = this;
+		p.level = p.boss.level + 1;
+		p.prev = children.trailer.prev;
+		p.next = children.trailer;
+		p.prev.next = p;
+		children.trailer.prev = p;
+		return p;
+	}
+
+	static void delete(companynode p, companynode other)
+	{
+		p.prev.next = p.next;
+		p.next.prev = p.prev;
+		if (other.children == null) 
+		{
+			other.children = new list();
+		}
+		if(p.children!=null)
+		{
+			if(p.children.header.next!=p.children.trailer)
+			{
+				companynode scan = p.children.header.next;
+				while(scan!=p.children.trailer)
+				{
+					scan.boss=other;
+					scan=scan.next;
+				}
+				other.children.append(p.children);
+			}
+		}
+		
+		p = null;
+	}
+
+	void printlist()
+	{
+		int currentlevel=0;
+		companynode n=new companynode();
+		queue q = new queue();
+		companynode scan = new companynode();
+		companynode nextone=new companynode();
+		q.enqueue(this);
+		do
+		{
+			n=q.dequeue();
+			if(currentlevel!=n.level)
+			{
+				System.out.println("\n\nlevel : "+n.level);
+				currentlevel=n.level;
+			}
+			System.out.print("\t"+n.name);
+			if(n.children!=null)
+			{
+				scan=n.children.header.next;			
+				while(scan!=n.children.trailer)
+				{
+					nextone=scan.next;
+					q.enqueue(scan);
+					scan=nextone;
+				}
+			}
+		}while(!q.isempty());
+	}
+}
+
+class list 
+{
+	companynode header,trailer;
+	list()
+	{
+		header = new companynode();
+		trailer = new companynode();
+		header.next = trailer;
+		trailer.prev = header;
+	}
+
+	companynode search(String input) throws NoSuchEmployeeFoundException 
+	{
+		companynode p = header.next;
+	        while (p != trailer) 
+		{
+			if (p.name.equals(input))
+        		{
+        			break;
+        		}
+	        	p = p.next;
+	        }
+		if (p == trailer) 
+		{
+	        	throw new NoSuchEmployeeFoundException(input);
+		}
+		return p;
+	}
+
+	void append(list l)
+	{
+		trailer.prev.next=l.header.next;
+		l.header.next.prev=trailer.prev;
+		trailer.prev=l.trailer.prev;
+		trailer.prev.next=trailer;
+	}
+}
